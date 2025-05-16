@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Checkout - My E-Commerce</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 1rem;
+            max-width: 700px;
+            margin: 0 auto;
+            background: #f9f9f9;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 1rem;
+        }
+
+        .cart-item {
+            display: flex;
+            justify-content: space-between;
+            border-bottom: 1px solid #ddd;
+            padding: 0.5rem 0;
+        }
+
+        .cart-item:last-child {
+            border-bottom: none;
+        }
+
+        .cart-item .title {
+            flex: 2;
+        }
+
+        .cart-item .quantity,
+        .cart-item .price {
+            flex: 1;
+            text-align: right;
+        }
+
+        .total {
+            font-weight: bold;
+            font-size: 1.2rem;
+            text-align: right;
+            margin-top: 1rem;
+            border-top: 2px solid #333;
+            padding-top: 0.5rem;
+        }
+
+        form {
+            margin-top: 2rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        label {
+            font-weight: bold;
+        }
+
+        input,
+        textarea {
+            padding: 0.5rem;
+            font-size: 1rem;
+            border-radius: 4px;
+            border: 1px solid #ccc;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        button {
+            background-color: #1a73e8;
+            color: white;
+            padding: 0.75rem;
+            border: none;
+            border-radius: 6px;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        button:hover {
+            background-color: #155ab6;
+        }
+
+        .empty-cart {
+            text-align: center;
+            font-size: 1.2rem;
+            margin-top: 2rem;
+            color: #777;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Checkout</h1>
+    <div id="cart-summary"></div>
+
+    <form id="checkout-form">
+        <label for="name">Full Name *</label>
+        <input type="text" id="name" required />
+
+        <label for="email">Email *</label>
+        <input type="email" id="email" required />
+
+        <label for="address">Shipping Address *</label>
+        <textarea id="address" rows="3" required></textarea>
+
+        <button type="submit">Place Order</button>
+    </form>
+
+    <script>
+        const cartSummary = document.getElementById('cart-summary');
+        const checkoutForm = document.getElementById('checkout-form');
+
+        function loadCart() {
+            const cart = JSON.parse(localStorage.getItem('cart')) || [];
+            if (cart.length === 0) {
+                cartSummary.innerHTML = '<p class="empty-cart">Your cart is empty.</p>';
+                checkoutForm.style.display = 'none';
+                return [];
+            }
+            checkoutForm.style.display = 'flex';
+
+            let total = 0;
+            cartSummary.innerHTML = '<div><strong>Items:</strong></div>';
+
+            cart.forEach(item => {
+                const itemTotal = item.price * (item.quantity || 1);
+                total += itemTotal;
+
+                const div = document.createElement('div');
+                div.className = 'cart-item';
+                div.innerHTML = `
+          <div class="title">${item.title}</div>
+          <div class="quantity">Qty: ${item.quantity || 1}</div>
+          <div class="price">$${itemTotal.toFixed(2)}</div>
+        `;
+                cartSummary.appendChild(div);
+            });
+
+            const totalDiv = document.createElement('div');
+            totalDiv.className = 'total';
+            totalDiv.textContent = `Total: $${total.toFixed(2)}`;
+            cartSummary.appendChild(totalDiv);
+
+            return cart;
+        }
+
+        // Load cart on page load
+        const cart = loadCart();
+
+        checkoutForm.addEventListener('submit', e => {
+            e.preventDefault();
+
+            // Basic form validation (HTML required attributes also apply)
+            const name = document.getElementById('name').value.trim();
+            const email = document.getElementById('email').value.trim();
+            const address = document.getElementById('address').value.trim();
+
+            if (!name || !email || !address) {
+                alert('Please fill out all required fields.');
+                return;
+            }
+
+            if (cart.length === 0) {
+                alert('Your cart is empty!');
+                return;
+            }
+
+            // Here you would usually send order data to your backend or payment gateway
+
+            alert('Thank you for your order, ' + name + '!');
+
+            // Clear cart after order
+            localStorage.removeItem('cart');
+
+            // Optionally redirect or reset form
+            checkoutForm.reset();
+            loadCart();
+        });
+    </script>
+</body>
+
+</html>
