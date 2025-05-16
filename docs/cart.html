@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Your Cart</title>
+    <link rel="stylesheet" href="styles/main.css" />
+</head>
+
+<body>
+
+    <header class="header">
+        <div class="logo">
+            <img src="assests/logo.png" alt="Brand Logo" />
+        </div>
+        <nav class="nav">
+            <ul class="nav-links">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="products.html">Products</a></li>
+                <li><a href="cart.html">About</a></li>
+                <li><a href="cart.html">Contact</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main class="cart-container">
+        <h1>Your Cart</h1>
+        <div id="cart-items" class="cart-items"></div>
+        <div class="cart-summary">
+            <p><strong>Total:</strong> $<span id="cart-total">0.00</span></p>
+            <button id="checkout-button" aria-label="Proceed to checkout">
+                <span>Checkout</span>
+                <svg xmlns="http://www.w3.org/2000/svg" style="width: 18px; height: 18px; margin-left: 8px;" fill="none"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                    viewBox="0 0 24 24">
+                    <path d="M5 12h14"></path>
+                    <path d="M12 5l7 7-7 7"></path>
+                </svg>
+            </button>
+
+        </div>
+    </main>
+
+    <script>
+        function getCart() {
+            return JSON.parse(localStorage.getItem('cart')) || [];
+        }
+
+        function saveCart(cart) {
+            localStorage.setItem('cart', JSON.stringify(cart));
+        }
+
+        function renderCart() {
+            const cartItemsContainer = document.getElementById('cart-items');
+            const cartTotalElem = document.getElementById('cart-total');
+            const cart = getCart();
+            cartItemsContainer.innerHTML = '';
+            let total = 0;
+
+            if (cart.length === 0) {
+                cartItemsContainer.innerHTML = '<p>Your cart is empty.</p>';
+                cartTotalElem.textContent = '0.00';
+                return;
+            }
+
+            cart.forEach((item, index) => {
+                const itemTotal = item.price * item.quantity;
+                total += itemTotal;
+
+                const itemEl = document.createElement('div');
+                itemEl.className = 'cart-item';
+                itemEl.innerHTML = `
+    <img src="${item.image}" alt="${item.title}" />
+    <div class="cart-item-info">
+        <h3>${item.title}</h3>
+        <p>$${item.price.toFixed(2)} x
+        <input type="number" min="1" value="${item.quantity}" data-index="${index}" class="quantity-input" />
+        = $${itemTotal.toFixed(2)}
+        </p>
+        <button class="remove-btn" data-index="${index}">Remove</button>
+    </div>
+    `;
+                cartItemsContainer.appendChild(itemEl);
+            });
+
+            cartTotalElem.textContent = total.toFixed(2);
+
+            // Handle quantity changes
+            document.querySelectorAll('.quantity-input').forEach(input => {
+                input.addEventListener('change', (e) => {
+                    const idx = e.target.dataset.index;
+                    const newQty = parseInt(e.target.value);
+                    if (newQty > 0) {
+                        cart[idx].quantity = newQty;
+                        saveCart(cart);
+                        renderCart(); // Refresh UI
+                    }
+                });
+            });
+
+            // Handle removals
+            document.querySelectorAll('.remove-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const idx = e.target.dataset.index;
+                    cart.splice(idx, 1);
+                    saveCart(cart);
+                    renderCart();
+                });
+            });
+        }
+
+        function checkoutCart() {
+            alert('Checkout is not implemented yet.');
+        }
+
+        const checkoutButton = document.getElementById('checkout-button');
+
+        checkoutButton.addEventListener('click', () => {
+            window.location.href = '/checkout.html';
+        });
+
+
+        document.addEventListener('DOMContentLoaded', renderCart);
+    </script>
+
+    <style>
+        .cart-container {
+            padding: 2rem;
+            max-width: 900px;
+            margin: auto;
+        }
+
+        .cart-items {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .cart-item {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+            border-bottom: 1px solid #ccc;
+            padding-bottom: 1rem;
+        }
+
+        .cart-item img {
+            width: 100px;
+            height: auto;
+        }
+
+        .cart-item-info {
+            flex: 1;
+        }
+
+        .quantity-input {
+            width: 60px;
+            margin-left: 0.5rem;
+        }
+
+        .remove-btn {
+            background-color: red;
+            color: white;
+            border: none;
+            padding: 0.5rem;
+            margin-top: 0.5rem;
+            cursor: pointer;
+        }
+
+        .cart-summary {
+            margin-top: 2rem;
+            text-align: right;
+        }
+
+        #checkout-button {
+            background-color: #1a73e8;
+            color: white;
+            padding: 0.8rem 1.6rem;
+            border: none;
+            border-radius: 6px;
+            font-weight: 600;
+            font-size: 1.1rem;
+            display: inline-flex;
+            align-items: center;
+            cursor: pointer;
+            transition: background-color 0.3s ease, box-shadow 0.2s ease;
+            user-select: none;
+        }
+
+        #checkout-button:hover,
+        #checkout-button:focus {
+            background-color: #155ab6;
+            box-shadow: 0 0 8px rgba(21, 90, 182, 0.7);
+            outline: none;
+        }
+
+        #checkout-button:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+            box-shadow: none;
+        }
+
+        @media (max-width: 600px) {
+            #checkout-button {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+    </style>
+
+</body>
+
+</html>
